@@ -1,2 +1,13 @@
 FROM alpine:3.23
-RUN apk add --no-cache libcurl=8.17.0-r1
+RUN apk update;\ 
+  apk add --no-cache \
+    # libcurl \
+    curl \
+    curl-dev\
+    ca-certificates \
+    libc-dev \
+    gdb mandoc \
+    man-pages \
+    gcc ; \
+  apk add docs
+WORKDIR /spider

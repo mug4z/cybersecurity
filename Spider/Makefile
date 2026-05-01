@@ -1,14 +1,12 @@
 NAME: spider
 
-gcc -Wall -Werror -Wextra main.c -L/home/tfrily/.brew/lib -lcurl -o test_curlOD
+# gcc -Wall -Werror -Wextra main.c -L/home/tfrily/.brew/lib -lcurl -o test_curlOD
 
-all:			$(LIBS) $(NAME)
 
-$(name):	$(objs)
-			$(cc) $(cflags) $(objs) $(link_libs) -o $@
-			@printf "created executable: $(green)$(name)$(reset)\n"
-%.o:	%.c 
-				$(CC) $(CFLAGS) $(DFLAGS) $(DEP_FILE) $(INCLUDES) -c $< -o $@
+spider-build:
+	docker build -t spider -f ./docker/Dockerfile . 
+spider-run:
+	docker run -it --name spider -v ./src/:/spider spider:latest
 
-.PHONY: all clean fclean re debug cleanLibs cleanLogs
+.PHONY: spider 
 
