@@ -2,6 +2,7 @@
 
 import requests
 import os
+import bs4
 from bs4 import BeautifulSoup
 
 
@@ -10,25 +11,44 @@ def create_dir(dir_path: str) -> None:
         os.makedirs(dir_path)
 
 
+def img_finder(data: bs4.BeautifulSoup) -> str:
+    # res = None
+    img = data.find_all('img')
+    
+    print(img)
+    print(type(img))
+    
+    # for link in data.find_all('img'):
+    #     link.get('src')
+    # type(res)
+    return ("lol")
+
+def link_finder(data: bs4.BeautifulSoup):
+    for link in data.find_all('a'):
+        print(link.get('href'))
+
 def BeautifulSoup_test():
-    with open("./data/korbenHome.html", "wb") as file:
-        soup = BeautifulSoup(file)
-    soup = BeautifulSoup("<html>data</html>")
-    print(soup)
+    with open("./data/korben.html", "rb") as file:
+        soup = BeautifulSoup(file,'html.parser')
+    # print(type(soup))
+    # soup = BeautifulSoup("<html>data</html>")
+    # print(soup.find_all('a'))
+    img_finder(soup)
+    # link_finder(soup)
         
 
 
 def download_page(url: str, dir: str = "./data/") -> None:
     create_dir(dir)
     print(requests.get(url).status_code)
-    with open(dir + "test.html", "wb") as file:
+    with open(dir + "korben.html", "wb") as file:
         file.write(requests.get(url).content)
     file.close()
 
 
 def main():
-    print("hello world")
-    # download_page("https://lwn.net/")
+    # print("hello world")
+    download_page("https://korben.info/")
     BeautifulSoup_test()
 
 
