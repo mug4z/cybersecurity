@@ -13,8 +13,7 @@ def get_web_page(url: str, headers: dict) -> requests.models.Response:
 
 def img_finder_all(data: bs4.BeautifulSoup) -> str:
     # lol = data.find_all('img',{'src':re.compile(r'(jpe?g)|(png)|(.gif)|(.bmp)$')})
-    lol = data.find_all('img','.png')
-    print(type(lol))
+    data.find_all(src=re.compile(r'(jpe?g)|(png)|(.gif)|(.bmp)$'))
     # for link in data.find_all("img"):
     #     list.append(link.get("src"))
     # print(list)
