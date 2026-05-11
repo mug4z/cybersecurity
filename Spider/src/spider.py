@@ -28,7 +28,7 @@ def is_external_img(src: str) -> bool:
     return False
 
 
-def download_images(domain_name: str, images: bs4.element.ResultSet, path: str = "./data/",) -> None:
+def download_images(domain_name: str, images: bs4.element.ResultSet, path: str = "./data/") -> None:
     create_dir(path)
     for image in images:
         img_link = image.get('src')
@@ -50,17 +50,31 @@ def img_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
 
 # TODO: make a function to handle full or relative url
 
+    # pattern = re.compile(
+    #     r"^http?s:\/\/(" + re.escape(name) + r")|(www."+ re.escape(name) + r").*"
+    # )
 # WARN: FOLLOW INTERNAL LINK ONLY
-def link_finder_all(domain_name: str, data: bs4.BeautifulSoup) -> bs4.element.ResultSet: 
-    name = urlsplit(domain_name).netloc
-    pattern = re.compile(
-        r"^http?s:\/\/(" + re.escape(name) + r")|(www."+ re.escape(name) + r").*"
-    )
-    return data.find_all("a", href=pattern)
+def link_finder_all(data: bs4.BeautifulSoup): 
+    return data.find_all("a")
+
 
 
 def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
     return BeautifulSoup(response, "html.parser")
+
+def recursive_download(domain_name: str, depth: int) -> None:
+    i = 0
+    # WARN: if an url was already viewed it should not be Donwloaded again
+    # NOTE: Donwload breadth-first. as https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download
+    url = domain_name
+    while (i < depth):
+        response = get_web_page(url, headers)
+        soup = beautiful_soup_creator(response.text)
+        images = img_finder_all(soup)
+        download_images(url, images)
+        links =  link_finder_all(soup)
+        i+=1
+        
 
 
 def main():
@@ -73,7 +87,9 @@ def main():
     try:
         response = get_web_page(args.url, headers)
         soup = beautiful_soup_creator(response.text)
-        link_finder_all(args.url, soup)
+        # print(link_finder_all(args.url, soup))
+        for link in link_finder_all(soup):
+            print(args.link.get('href'))
     except Exception as e:
         print(f"Failed for {e}")
     # images = img_finder_all(soup)
@@ -92,3 +108,4 @@ if __name__ == "__main__":
 # TODO: Make logs
 #
 # NOTE: website to check are korben.info and lwn.net
+#
