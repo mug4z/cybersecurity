@@ -13,7 +13,6 @@ headers = {
          Gecko/20100101 Firefox/144.0"
 }
 
-# BUG: Check the issue when the url cannot be resolved
 def get_web_page(url: str, headers: dict) -> requests.models.Response:
         return requests.get(url, headers=headers, timeout=10)
 
