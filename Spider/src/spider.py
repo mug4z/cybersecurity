@@ -51,16 +51,12 @@ def img_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
 # TODO: make a function to handle full or relative url
 
 # WARN: FOLLOW INTERNAL LINK ONLY
-def link_finder_all(domain_name: str, data: bs4.BeautifulSoup): 
+def link_finder_all(domain_name: str, data: bs4.BeautifulSoup) -> bs4.element.ResultSet: 
     name = urlsplit(domain_name).netloc
     pattern = re.compile(
-        r"^http?s:\/\/(" + re.escape(name)+r")|(www."+ re.escape(name) + r").*"
+        r"^http?s:\/\/(" + re.escape(name) + r")|(www."+ re.escape(name) + r").*"
     )
-    for link in data.find_all("a",href=pattern):
-        print (urlsplit(str(link.get('href'))).netloc)
-        # print(link.get("href"))
-    # for link in data.find_all("a"):
-    #     print(link.get("href"))
+    return data.find_all("a", href=pattern)
 
 
 def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
