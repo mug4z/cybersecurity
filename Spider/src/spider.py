@@ -24,7 +24,6 @@ def create_dir(path: str) -> None:
 
 def is_external_img(src: str) -> bool:
     split_result = urlsplit(src)
-    # print(split_result)
     if split_result.scheme and split_result.netloc:
         return True
     return False
