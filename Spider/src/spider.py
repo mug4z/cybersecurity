@@ -38,20 +38,30 @@ def download_images(domain_name: str, images: bs4.element.ResultSet, path: str =
         try:
             content = get_web_page(img_link ,headers=headers).content
         except Exception as e:
-            print(f"Failed get {e}")
+            print(f"Failed to get {img_link} for {e}")
             continue
         if not os.path.isfile(path+image.get('src').split('/')[-1]):
             with open(path+image.get('src').split('/')[-1],'wb') as file:
                 file.write(content)
+
     
 
 def img_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
     return data.find_all("img", src=re.compile(r"(\.jpe?g)|(\.png)|(\.gif)|(\.bmp)$"))
 
+# TODO: make a function to handle full or relative url
 
-def link_finder_all(data: bs4.BeautifulSoup):
-    for link in data.find_all("a"):
-        print(link.get("href"))
+# WARN: FOLLOW INTERNAL LINK ONLY
+def link_finder_all(domain_name: str, data: bs4.BeautifulSoup): 
+    name = urlsplit(domain_name).netloc
+    pattern = re.compile(
+        r"^http?s:\/\/(" + re.escape(name)+r")|(www."+ re.escape(name) + r").*"
+    )
+    for link in data.find_all("a",href=pattern):
+        print (urlsplit(str(link.get('href'))).netloc)
+        # print(link.get("href"))
+    # for link in data.find_all("a"):
+    #     print(link.get("href"))
 
 
 def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
@@ -65,14 +75,14 @@ def main():
     parser.add_argument("-l","--level",type=int,help="The level of recursion, by default it is 5")
     parser.add_argument("url",help="The target website to download from, in the form https://url")
     args = parser.parse_args()
-    response = get_web_page(args.url, headers)
-    
-    if response.status_code != 200:
-        print("NOT GOOD")
-        exit(1)
-    soup = beautiful_soup_creator(response.text)
-    images = img_finder_all(soup)
-    download_images(args.url,images)
+    try:
+        response = get_web_page(args.url, headers)
+        soup = beautiful_soup_creator(response.text)
+        link_finder_all(args.url, soup)
+    except Exception as e:
+        print(f"Failed for {e}")
+    # images = img_finder_all(soup)
+    # download_images(args.url,images)
 
 
 if __name__ == "__main__":
@@ -81,7 +91,7 @@ if __name__ == "__main__":
 
 # TODO: Function to download all image (jpg/jpeg, .png,.gif, .bmp) from a single page -> DONE
 # TODO: add arguments -> DONE 
-# TODO: Get all the image from a given url
+# TODO: Get all the image from a given url -> DONE
 # TODO: Function to follow links
 # TODO: Implement arguments
 # TODO: Make logs
