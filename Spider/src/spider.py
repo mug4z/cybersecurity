@@ -13,8 +13,9 @@ headers = {
          Gecko/20100101 Firefox/144.0"
 }
 
+# BUG: Check the issue when the url cannot be resolved
 def get_web_page(url: str, headers: dict) -> requests.models.Response:
-    return requests.get(url, headers=headers)
+        return requests.get(url, headers=headers, timeout=10)
 
 def create_dir(path: str) -> None:
     if not os.path.isdir(path):
@@ -35,9 +36,14 @@ def download_images(domain_name: str, images: bs4.element.ResultSet, path: str =
         img_link = image.get('src')
         if not is_external_img(img_link):
             img_link = domain_name + img_link
-        if not os.path.isfile(image.get('src').split('/')[-1]):
+        try:
+            content = get_web_page(img_link ,headers=headers).content
+        except Exception as e:
+            print(f"Failed get {e}")
+            continue
+        if not os.path.isfile(path+image.get('src').split('/')[-1]):
             with open(path+image.get('src').split('/')[-1],'wb') as file:
-                file.write(get_web_page(img_link ,headers=headers).content)
+                file.write(content)
     
 
 def img_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
@@ -56,16 +62,17 @@ def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-p","--path",help="The path where to download the images")
+    parser.add_argument("-r","--recursive",help="Download images recursively")
+    parser.add_argument("-l","--level",type=int,help="The level of recursion, by default it is 5")
     parser.add_argument("url",help="The target website to download from, in the form https://url")
     args = parser.parse_args()
     response = get_web_page(args.url, headers)
-    print(response.status_code)
+    
     if response.status_code != 200:
         print("NOT GOOD")
         exit(1)
     soup = beautiful_soup_creator(response.text)
     images = img_finder_all(soup)
-    # print(images)
     download_images(args.url,images)
 
 
@@ -74,7 +81,10 @@ if __name__ == "__main__":
 
 
 # TODO: Function to download all image (jpg/jpeg, .png,.gif, .bmp) from a single page -> DONE
-# TODO: add arguments
-# TODO: Function to follow links
+# TODO: add arguments -> DONE 
 # TODO: Get all the image from a given url
-# TODO: website to check are korben.info and lwn.net
+# TODO: Function to follow links
+# TODO: Implement arguments
+# TODO: Make logs
+#
+# NOTE: website to check are korben.info and lwn.net
