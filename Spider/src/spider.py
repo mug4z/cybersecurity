@@ -30,13 +30,13 @@ def is_relative_img(src: str) -> bool:
 
 # BUG: This function is not scaling right with the domain_name
 # BUG: The way of determine the image path must change.
-def download_images(domain_name: str, images: bs4.element.ResultSet, path: str = "./data/") -> None:
+def download_images(base_url: str, images: bs4.element.ResultSet, path: str = "./data/") -> None:
     create_dir(path)
     for image in images:
         img_link = image.get('src')
         print(f"IMAGE LINK {img_link}")
         if not is_relative_img(img_link):
-            img_link = domain_name + img_link
+            img_link = base_url + img_link
         try:
             print(f"Try to download {img_link} ")
             content = get_web_page(img_link ,headers=headers).content
