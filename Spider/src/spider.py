@@ -62,6 +62,7 @@ def link_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
     return data.find_all("a",href=re.compile(r"."))
 
 # WARN: FOLLOW INTERNAL LINK ONLY
+# NOTE: change domain_name by base_url ?
 def internal_link(links: bs4.element.ResultSet, domain_name: str) -> list:
     name = urlsplit(domain_name).netloc
     pattern = [
