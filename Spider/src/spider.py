@@ -53,10 +53,29 @@ def img_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
     # pattern = re.compile(
     #     r"^http?s:\/\/(" + re.escape(name) + r")|(www."+ re.escape(name) + r").*"
     # )
-# WARN: FOLLOW INTERNAL LINK ONLY
-def link_finder_all(data: bs4.BeautifulSoup): 
-    return data.find_all("a")
 
+def link_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet: 
+    return data.find_all("a",href=re.compile(r"."))
+
+# WARN: FOLLOW INTERNAL LINK ONLY
+def internal_link(links: bs4.element.ResultSet, domain_name: str) -> list:
+    name = urlsplit(domain_name).netloc
+    pattern = [
+        re.compile(r"^https?:\/\/(?:www\.)?("+ re.escape(name) + r").*"),
+        re.compile(r"^\/.*")
+    ]
+    res = []
+    #NOTE: When we have https://domain_name
+    #NOTE: When we have just the / character
+    for link in links:
+        link_to_add = link.get('href')
+        if re.search(pattern[0], link_to_add ) is not None:
+            res.append(link_to_add )
+        elif re.search(pattern[1], link_to_add) is not None:
+            res.append(domain_name + link_to_add)
+        else:
+            continue
+    return res
 
 
 def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
@@ -88,8 +107,7 @@ def main():
         response = get_web_page(args.url, headers)
         soup = beautiful_soup_creator(response.text)
         # print(link_finder_all(args.url, soup))
-        for link in link_finder_all(soup):
-            print(args.link.get('href'))
+        print(internal_link(link_finder_all(soup), args.url))
     except Exception as e:
         print(f"Failed for {e}")
     # images = img_finder_all(soup)
