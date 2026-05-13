@@ -21,20 +21,24 @@ def create_dir(path: str) -> None:
         os.makedirs(path)
 
 
-def is_external_img(src: str) -> bool:
+def is_relative_img(src: str) -> bool:
     split_result = urlsplit(src)
     if split_result.scheme and split_result.netloc:
         return True
     return False
 
 
+# BUG: This function is not scaling right with the domain_name
+# BUG: The way of determine the image path must change.
 def download_images(domain_name: str, images: bs4.element.ResultSet, path: str = "./data/") -> None:
     create_dir(path)
     for image in images:
         img_link = image.get('src')
-        if not is_external_img(img_link):
+        print(f"IMAGE LINK {img_link}")
+        if not is_relative_img(img_link):
             img_link = domain_name + img_link
         try:
+            print(f"Try to download {img_link} ")
             content = get_web_page(img_link ,headers=headers).content
         except Exception as e:
             print(f"Failed to get {img_link} for {e}")
@@ -81,37 +85,50 @@ def internal_link(links: bs4.element.ResultSet, domain_name: str) -> list:
 def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
     return BeautifulSoup(response, "html.parser")
 
-def recursive_download(domain_name: str, depth: int) -> None:
-    i = 0
-    # WARN: if an url was already viewed it should not be Donwloaded again
-    # NOTE: Donwload breadth-first. as https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download
-    url = domain_name
-    while (i < depth):
-        response = get_web_page(url, headers)
-        soup = beautiful_soup_creator(response.text)
-        images = img_finder_all(soup)
-        download_images(url, images)
-        links =  link_finder_all(soup)
-        i+=1
+# WARN: if an url was already viewed it should not be Donwloaded again
+# NOTE: Donwload breadth-first. as https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download
+def recursive_download(domain_name: str, links: list , depth: int, visited_link: set) -> None:
+    link_depth = {}
+    actual_depth = 1
+
+    next_link = list()
+    while(actual_depth <= depth):
+        print(f"[ACTUAL DEPTH] {actual_depth}")
+        for link in links:
+            if link in visited_link:
+                continue
+            response = get_web_page(link, headers)
+            soup = beautiful_soup_creator(response.text)
+            print(f"Will download for {link}")
+            download_images(domain_name, img_finder_all(soup))
+            links = internal_link(link_finder_all(soup), domain_name)
+            next_link.extend(links)
+            visited_link.add(link)
+        actual_depth += 1
+        links.clear()
+        links = next_link.copy()
+        next_link.clear()
         
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-p","--path",help="The path where to download the images")
-    parser.add_argument("-r","--recursive",help="Download images recursively")
+    parser.add_argument("-r","--recursive",action="store_true",help="Download images recursively")
     parser.add_argument("-l","--level",type=int,help="The level of recursion, by default it is 5")
     parser.add_argument("url",help="The target website to download from, in the form https://url")
     args = parser.parse_args()
     try:
         response = get_web_page(args.url, headers)
         soup = beautiful_soup_creator(response.text)
-        # print(link_finder_all(args.url, soup))
-        print(internal_link(link_finder_all(soup), args.url))
+        download_images(args.url, img_finder_all(soup))
+        if args.recursive:
+            visited_link = set()
+            links = internal_link(link_finder_all(soup), args.url)
+            visited_link.add(args.url)
+            recursive_download(args.url, links, 1, visited_link)
     except Exception as e:
         print(f"Failed for {e}")
-    # images = img_finder_all(soup)
-    # download_images(args.url,images)
 
 
 if __name__ == "__main__":
@@ -121,6 +138,7 @@ if __name__ == "__main__":
 # TODO: Function to download all image (jpg/jpeg, .png,.gif, .bmp) from a single page -> DONE
 # TODO: add arguments -> DONE 
 # TODO: Get all the image from a given url -> DONE
+# TODO: All internal linke from a url -> DONE
 # TODO: Function to follow links
 # TODO: Implement arguments
 # TODO: Make logs
