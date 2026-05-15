@@ -27,7 +27,7 @@ def is_relative_img(src: str) -> bool:
         return True
     return False
 
-
+#NOTE: //42lausanne.ch/wp-content/uploads/2024/12/1.png
 def download_images(base_url: str, images: bs4.element.ResultSet, path: str = "./data/") -> None:
     create_dir(path)
     for image in images:
@@ -37,7 +37,10 @@ def download_images(base_url: str, images: bs4.element.ResultSet, path: str = ".
             img_link = base_url + img_link
         try:
             print(f"Try to download {img_link} ")
-            content = get_web_page(img_link ,headers=headers).content
+            response = get_web_page(img_link ,headers=headers)
+            content = response.content
+            if response.status_code >= 400:
+                raise Exception(f"BAD request with status {response.status_code}")
         except Exception as e:
             print(f"Failed to get {img_link} for {e}")
             continue
@@ -91,8 +94,7 @@ def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
 
 # WARN: if an url was already viewed it should not be Donwloaded again
 # NOTE: Donwload breadth-first. as https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download
-def recursive_download(domain_name: str, links: list , depth: int, visited_link: set) -> None:
-    link_depth = {}
+def recursive_download(base_url: str, links: list , depth: int, visited_link: set) -> None:
     actual_depth = 1
 
     next_link = list()
@@ -104,8 +106,8 @@ def recursive_download(domain_name: str, links: list , depth: int, visited_link:
             response = get_web_page(link, headers)
             soup = beautiful_soup_creator(response.text)
             print(f"Will download for {link}")
-            download_images(domain_name, img_finder_all(soup))
-            links = internal_link(link_finder_all(soup), domain_name)
+            download_images(base_url, img_finder_all(soup))
+            links = internal_link(link_finder_all(soup), base_url)
             next_link.extend(links)
             visited_link.add(link)
         actual_depth += 1
@@ -127,10 +129,11 @@ def main():
         soup = beautiful_soup_creator(response.text)
         download_images(extract_base_url(args.url), img_finder_all(soup))
         if args.recursive:
+            level = args.level if args.level is not None else 5
             visited_link = set()
             links = internal_link(link_finder_all(soup), args.url)
             visited_link.add(args.url)
-            recursive_download(args.url, links, 1, visited_link)
+            recursive_download(extract_base_url(args.url), links, level, visited_link)
     except Exception as e:
         print(f"Failed for {e}")
 
