@@ -82,6 +82,11 @@ def internal_link(links: bs4.element.ResultSet, domain_name: str) -> list:
             continue
     return res
 
+#NOTE: scheme+ :// + netloc = base_url
+def extract_base_url(url: str) -> str:
+    split = urlsplit(url)
+    return split.scheme + "://" + split.netloc
+    
 
 def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
     return BeautifulSoup(response, "html.parser")
@@ -122,7 +127,7 @@ def main():
     try:
         response = get_web_page(args.url, headers)
         soup = beautiful_soup_creator(response.text)
-        download_images(args.url, img_finder_all(soup))
+        download_images(extract_base_url(args.url), img_finder_all(soup))
         if args.recursive:
             visited_link = set()
             links = internal_link(link_finder_all(soup), args.url)
