@@ -28,8 +28,6 @@ def is_relative_img(src: str) -> bool:
     return False
 
 
-# BUG: This function is not scaling right with the domain_name
-# BUG: The way of determine the image path must change.
 def download_images(base_url: str, images: bs4.element.ResultSet, path: str = "./data/") -> None:
     create_dir(path)
     for image in images:
