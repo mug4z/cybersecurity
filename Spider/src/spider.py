@@ -122,18 +122,26 @@ def main():
     parser.add_argument("-p","--path",help="The path where to download the images")
     parser.add_argument("-r","--recursive",action="store_true",help="Download images recursively")
     parser.add_argument("-l","--level",type=int,help="The level of recursion, by default it is 5")
+    parser.add_argument("-nc","--nice",action="store_true",help="Respect the crawl_delay of the robots.txt")
     parser.add_argument("url",help="The target website to download from, in the form https://url")
     args = parser.parse_args()
     try:
-        response = get_web_page(args.url, headers)
+        if args.nice:
+            rp = robots_rule(extract_base_url(args.url))
+            rate = rp.crawl_delay("*")
+            if rate is None:
+                rate = 0
+        else:
+            rate = 0
+        response = get_web_page(args.url, headers,int(rate))
         soup = beautiful_soup_creator(response.text)
-        download_images(extract_base_url(args.url), img_finder_all(soup))
+        download_images(extract_base_url(args.url),img_finder_all(soup),int(rate))
         if args.recursive:
             level = args.level if args.level is not None else 5
             visited_link = set()
             links = internal_link(link_finder_all(soup), args.url)
             visited_link.add(args.url)
-            recursive_download(extract_base_url(args.url), links, level, visited_link)
+            recursive_download(extract_base_url(args.url), links, level, visited_link, int(rate))
     except Exception as e:
         print(f"Failed for {e}")
 
