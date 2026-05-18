@@ -9,6 +9,7 @@ import bs4
 from bs4 import BeautifulSoup
 import argparse
 import time
+import hashlib
 
 headers = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:144.0) \
@@ -44,18 +45,21 @@ def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,pat
         if not is_relative_img(img_link):
             img_link = base_url + img_link
         try:
+            print(f"Donwload {img_link}")
             response = get_web_page(img_link ,headers, rate)
             content = response.content
+            hash_name = hashlib.md5(content).hexdigest()[:10]
+            print(f"hash_name {hash_name}")
+            if os.path.isfile(path+hash_name):
+                print(f"Image {path+image.get('src').split('/')[-1]} already downloaded")
+                continue
             if response.status_code >= 400:
                 raise Exception(f"BAD request with status {response.status_code}")
         except Exception as e:
             print(f"Failed to get {img_link} for {e}")
             continue
-        if not os.path.isfile(path+image.get('src').split('/')[-1]):
-            with open(path+image.get('src').split('/')[-1],'wb') as file:
-                file.write(content)
-        else:
-            print(f"Image {path+image.get('src')} already downloaded")
+        with open(path+hash_name,'wb') as file:
+            file.write(content)
 
     
 
