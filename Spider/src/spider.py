@@ -3,17 +3,28 @@
 import re
 import requests
 from urllib.parse import urlsplit
+import urllib.robotparser
 import os
 import bs4
 from bs4 import BeautifulSoup
 import argparse
+import time
 
 headers = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:144.0) \
          Gecko/20100101 Firefox/144.0"
 }
 
-def get_web_page(url: str, headers: dict) -> requests.models.Response:
+def content_type_checker(url: str) -> bool:
+    html = re.compile(r".*text/html.*")
+    content_type = requests.head(url).headers['content-type']
+    if re.search(html, content_type):
+        return True
+    return False
+
+
+def get_web_page(url: str, headers: dict, rate: int) -> requests.models.Response:
+        time.sleep(rate)
         return requests.get(url, headers=headers, timeout=10)
 
 def create_dir(path: str) -> None:
@@ -28,17 +39,18 @@ def is_relative_img(src: str) -> bool:
     return False
 
 #NOTE: //42lausanne.ch/wp-content/uploads/2024/12/1.png
-def download_images(base_url: str, images: bs4.element.ResultSet, path: str = "./data/") -> None:
+def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,path: str = "./data/") -> None:
     create_dir(path)
     for image in images:
         img_link = image.get('src')
-        print(f"IMAGE LINK {img_link}")
+        # print(f"IMAGE LINK {img_link}")
         if not is_relative_img(img_link):
             img_link = base_url + img_link
         try:
-            print(f"Try to download {img_link} ")
-            response = get_web_page(img_link ,headers=headers)
+            # print(f"Try to download {img_link} ")
+            response = get_web_page(img_link ,headers, rate)
             content = response.content
+            # print(f"RESPONSE CODE RECEIVED IS {response.status_code}")
             if response.status_code >= 400:
                 raise Exception(f"BAD request with status {response.status_code}")
         except Exception as e:
@@ -47,6 +59,8 @@ def download_images(base_url: str, images: bs4.element.ResultSet, path: str = ".
         if not os.path.isfile(path+image.get('src').split('/')[-1]):
             with open(path+image.get('src').split('/')[-1],'wb') as file:
                 file.write(content)
+        else:
+            print(f"Image {path+image.get('src')} already downloaded")
 
     
 
@@ -94,7 +108,9 @@ def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
 
 # WARN: if an url was already viewed it should not be Donwloaded again
 # NOTE: Donwload breadth-first. as https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download
-def recursive_download(base_url: str, links: list , depth: int, visited_link: set) -> None:
+# TEST: Check if the donwload on 42lausanne.ch with wget and this script are the same.
+# TEST: wget with recursive 5 get 734 images.
+def recursive_download(base_url: str, links: list , depth: int, visited_link: set, rate: int) -> None:
     actual_depth = 1
 
     next_link = list()
@@ -103,19 +119,31 @@ def recursive_download(base_url: str, links: list , depth: int, visited_link: se
         for link in links:
             if link in visited_link:
                 continue
-            response = get_web_page(link, headers)
-            soup = beautiful_soup_creator(response.text)
+            print(f"ANALYSE LINK {link}")
+            try:
+                response = get_web_page(link, headers, rate)
+                soup = beautiful_soup_creator(response.text)
+            except Exception as e:
+                print(f"{link} could not be used because of {e}")
+                continue
             print(f"Will download for {link}")
-            download_images(base_url, img_finder_all(soup))
+            download_images(base_url, img_finder_all(soup), rate)
             links = internal_link(link_finder_all(soup), base_url)
             next_link.extend(links)
+            print(f"SIZE OF next_link is {len(next_link)}")
             visited_link.add(link)
         actual_depth += 1
+        print(f"SIZE OF visited_link is {len(visited_link)}")
         links.clear()
         links = next_link.copy()
         next_link.clear()
         
 
+def robots_rule(base_url: str) -> urllib.robotparser.RobotFileParser :
+    rp = urllib.robotparser.RobotFileParser()
+    rp.set_url(base_url + "/robots.txt")
+    rp.read()
+    return rp
 
 def main():
     parser = argparse.ArgumentParser()
@@ -126,13 +154,17 @@ def main():
     parser.add_argument("url",help="The target website to download from, in the form https://url")
     args = parser.parse_args()
     try:
-        if args.nice:
-            rp = robots_rule(extract_base_url(args.url))
-            rate = rp.crawl_delay("*")
-            if rate is None:
-                rate = 0
-        else:
-            rate = 0
+        # if args.nice:
+        #     rp = robots_rule(extract_base_url(args.url))
+        #     rate = rp.crawl_delay("*")
+        #     if rate is None:
+        #         rate = 0
+        # else:
+        #     rate = 0
+        rate = 0
+        if not content_type_checker(args.url):
+            print(f"WRONG TYPE")
+            exit(1)
         response = get_web_page(args.url, headers,int(rate))
         soup = beautiful_soup_creator(response.text)
         download_images(extract_base_url(args.url),img_finder_all(soup),int(rate))
@@ -149,14 +181,14 @@ def main():
 if __name__ == "__main__":
     main()
 
-
 # TODO: Function to download all image (jpg/jpeg, .png,.gif, .bmp) from a single page -> DONE
 # TODO: add arguments -> DONE 
 # TODO: Get all the image from a given url -> DONE
 # TODO: All internal linke from a url -> DONE
-# TODO: Function to follow links
+# TODO: Function to follow links -> DONE ?
+# TODO: Follow the robots.txt directive
 # TODO: Implement arguments
 # TODO: Make logs
 #
-# NOTE: website to check are korben.info and lwn.net
+# NOTE: website to check are korben.info and lwn.net and 42lausanne.ch
 #
