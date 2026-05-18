@@ -41,14 +41,11 @@ def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,pat
     create_dir(path)
     for image in images:
         img_link = image.get('src')
-        # print(f"IMAGE LINK {img_link}")
         if not is_relative_img(img_link):
             img_link = base_url + img_link
         try:
-            # print(f"Try to download {img_link} ")
             response = get_web_page(img_link ,headers, rate)
             content = response.content
-            # print(f"RESPONSE CODE RECEIVED IS {response.status_code}")
             if response.status_code >= 400:
                 raise Exception(f"BAD request with status {response.status_code}")
         except Exception as e:
