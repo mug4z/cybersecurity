@@ -22,7 +22,6 @@ def content_type_checker(url: str) -> bool:
         return True
     return False
 
-
 def get_web_page(url: str, headers: dict, rate: int) -> requests.models.Response:
         time.sleep(rate)
         return requests.get(url, headers=headers, timeout=10)
@@ -38,7 +37,6 @@ def is_relative_img(src: str) -> bool:
         return True
     return False
 
-#NOTE: //42lausanne.ch/wp-content/uploads/2024/12/1.png
 def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,path: str = "./data/") -> None:
     create_dir(path)
     for image in images:
@@ -67,17 +65,9 @@ def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,pat
 def img_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
     return data.find_all("img", src=re.compile(r"(\.jpe?g)|(\.png)|(\.gif)|(\.bmp)$"))
 
-# TODO: make a function to handle full or relative url
-
-    # pattern = re.compile(
-    #     r"^http?s:\/\/(" + re.escape(name) + r")|(www."+ re.escape(name) + r").*"
-    # )
-
 def link_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet: 
     return data.find_all("a",href=re.compile(r"."))
 
-# WARN: FOLLOW INTERNAL LINK ONLY
-# NOTE: change domain_name by base_url ?
 def internal_link(links: bs4.element.ResultSet, domain_name: str) -> list:
     name = urlsplit(domain_name).netloc
     pattern = [
@@ -85,8 +75,6 @@ def internal_link(links: bs4.element.ResultSet, domain_name: str) -> list:
         re.compile(r"^\/.*")
     ]
     res = []
-    #NOTE: When we have https://domain_name
-    #NOTE: When we have just the / character
     for link in links:
         link_to_add = link.get('href')
         if re.search(pattern[0], link_to_add ) is not None:
@@ -97,7 +85,6 @@ def internal_link(links: bs4.element.ResultSet, domain_name: str) -> list:
             continue
     return res
 
-#NOTE: scheme+ :// + netloc = base_url
 def extract_base_url(url: str) -> str:
     split = urlsplit(url)
     return split.scheme + "://" + split.netloc
@@ -106,8 +93,6 @@ def extract_base_url(url: str) -> str:
 def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
     return BeautifulSoup(response, "html.parser")
 
-# WARN: if an url was already viewed it should not be Donwloaded again
-# NOTE: Donwload breadth-first. as https://www.gnu.org/software/wget/manual/wget.html#Recursive-Download
 # TEST: Check if the donwload on 42lausanne.ch with wget and this script are the same.
 # TEST: wget with recursive 5 get 734 images.
 def recursive_download(base_url: str, links: list , depth: int, visited_link: set, rate: int) -> None:
@@ -154,14 +139,13 @@ def main():
     parser.add_argument("url",help="The target website to download from, in the form https://url")
     args = parser.parse_args()
     try:
-        # if args.nice:
-        #     rp = robots_rule(extract_base_url(args.url))
-        #     rate = rp.crawl_delay("*")
-        #     if rate is None:
-        #         rate = 0
-        # else:
-        #     rate = 0
-        rate = 0
+        if args.nice:
+            rp = robots_rule(extract_base_url(args.url))
+            rate = rp.crawl_delay("*")
+            if rate is None:
+                rate = 0
+        else:
+            rate = 0
         if not content_type_checker(args.url):
             print(f"WRONG TYPE")
             exit(1)
@@ -186,8 +170,8 @@ if __name__ == "__main__":
 # TODO: Get all the image from a given url -> DONE
 # TODO: All internal linke from a url -> DONE
 # TODO: Function to follow links -> DONE ?
-# TODO: Follow the robots.txt directive
-# TODO: Implement arguments
+# TODO: Follow the robots.txt directive -> only crawl_delay
+# TODO: Implement arguments -> DONE
 # TODO: Make logs
 #
 # NOTE: website to check are korben.info and lwn.net and 42lausanne.ch
