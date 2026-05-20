@@ -38,7 +38,7 @@ def is_relative_img(src: str) -> bool:
         return True
     return False
 
-def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,path: str = "./data/") -> None:
+def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,path: str) -> None:
     create_dir(path)
     for image in images:
         img_link = image.get('src')
@@ -60,8 +60,6 @@ def download_images(base_url: str, images: bs4.element.ResultSet, rate: int ,pat
             continue
         with open(path+hash_name,'wb') as file:
             file.write(content)
-
-    
 
 def img_finder_all(data: bs4.BeautifulSoup) -> bs4.element.ResultSet:
     return data.find_all("img", src=re.compile(r"(\.jpe?g)|(\.png)|(\.gif)|(\.bmp)$"))
@@ -96,7 +94,7 @@ def beautiful_soup_creator(response: str) -> bs4.BeautifulSoup:
 
 # TEST: Check if the donwload on 42lausanne.ch with wget and this script are the same.
 # TEST: wget with recursive 5 get 734 images.
-def recursive_download(base_url: str, links: list , depth: int, visited_link: set, rate: int) -> None:
+def recursive_download(base_url: str, links: list , depth: int, visited_link: set, rate: int, path: str) -> None:
     actual_depth = 1
 
     next_link = list()
@@ -113,7 +111,7 @@ def recursive_download(base_url: str, links: list , depth: int, visited_link: se
                 print(f"{link} could not be used because of {e}")
                 continue
             print(f"Will download for {link}")
-            download_images(base_url, img_finder_all(soup), rate)
+            download_images(base_url, img_finder_all(soup), rate, path)
             links = internal_link(link_finder_all(soup), base_url)
             next_link.extend(links)
             print(f"SIZE OF next_link is {len(next_link)}")
@@ -150,15 +148,18 @@ def main():
         if not content_type_checker(args.url):
             print(f"WRONG TYPE")
             exit(1)
+        if not args.path:
+            args.path = "./data/"
         response = get_web_page(args.url, headers,int(rate))
         soup = beautiful_soup_creator(response.text)
-        download_images(extract_base_url(args.url),img_finder_all(soup),int(rate))
+        print(args.path)
+        download_images(extract_base_url(args.url),img_finder_all(soup),int(rate),args.path)
         if args.recursive:
             level = args.level if args.level is not None else 5
             visited_link = set()
             links = internal_link(link_finder_all(soup), args.url)
             visited_link.add(args.url)
-            recursive_download(extract_base_url(args.url), links, level, visited_link, int(rate))
+            recursive_download(extract_base_url(args.url), links, level, visited_link, int(rate), args.path)
     except Exception as e:
         print(f"Failed for {e}")
 
