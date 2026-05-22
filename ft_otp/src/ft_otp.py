@@ -33,10 +33,10 @@ def main():
     # hexhash256 = hashed256.hexdigest()
     # print(hexhash1)
     # print(hexhash256)
-    
+    # NOTE: See if the 20 byte correspondance from hexadecimal what it should be represented
     hashed1 = hmac.new(testSecret,testCount, sha1)
     print(hashed1.hexdigest())
-    hexhash1 = hashed1.hexdigest()[0:20]
+    hexhash1 = hashed1.hexdigest()
     P = dynamic_truncation(hexhash1)
 
     # print(last_4_bits)
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     main()
 
 
-# DT(String) // String = String[0]...String[63]
-#  Let OffsetBits be the low-order 4 bits of String[63]
+# DT(String) // String = String[0]...String[19]
+#  Let OffsetBits be the low-order 4 bits of String[19]
 #  Offset = StToNum(OffsetBits) // 0 <= OffSet <= 15
 #  Let P = String[OffSet]...String[OffSet+3]
 #  Return the Last 31 bits of P
