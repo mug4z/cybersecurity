@@ -16,7 +16,7 @@ import struct
 
 # def create_htop_value(k, c):
 
-def get_last_4bit(c :bytes):
+def get_last_4bit(c :bytes) -> int:
     return int.from_bytes(c,byteorder='little') & 15
 
 def dynamic_truncation(HS: str):
@@ -45,12 +45,16 @@ def dynamic_truncation(HS: str):
 
     # 41397eea
     # n.to_bytes(n.bit_length() + 7) // 8, 'big')
-    # return (int(P, 16)  & 2147483647)
-
+    # return (int(P, 16)  & 2147483647) 
 def gen_HOTP(hash: bytes):
     # NOTE: get the last_4_bits
     offset =  hash[len(hash) - 1] & 0xf 
-    print(hash[offset] << 24)
+    print(f"hash[offset] {hash[offset]}")
+    print(f"hash[offset] & 0x7f: {hash[offset] & 0x7f}")
+
+    print(f"hash[offset + 1 ] {hash[offset + 1]}")
+    print(f"hash[offset + 1] & 0xff: {hash[offset + 1] & 0xff}")
+    print(f"hash[offset:offset+4] {int.from_bytes(hash[offset:offset + 4])}")
     binary =  (
                 ((hash[offset] & 0x7f) << 24) 
               | ((hash[offset + 1] & 0xff) << 16) 
@@ -62,19 +66,23 @@ def gen_HOTP(hash: bytes):
  
 
 def main():
+
+    # NOTE: This part is OK !!!
     testSecret = b"12345678901234567890"
-    testCount = struct.pack('>Q',0)
-    # hashed1 = hmac.new(key,raw, sha1)
-    # hexhash1 = hashed1.hexdigest()
-    # hashed256 = hmac.new(key,raw, sha256)
-    # hexhash256 = hashed256.hexdigest()
-    # print(hexhash1)
-    # print(hexhash256)
+    testCount = struct.pack('>Q',9)
+
     # NOTE: See if the 20 byte correspondance from hexadecimal what it should be represented
-    hashed1 = hmac.new(testSecret,testCount, sha1)
-    print(hashed1.hexdigest())
+    # NOTE: Tested OK with the test data of the rfc4226
+    hashed1 = hmac.new(testSecret, testCount, sha1)
+    print(f"hashed1 hexdigest {hashed1.hexdigest()}")
+    print(len(hashed1.hexdigest()))
     hexhash1 = hashed1.hexdigest()
-    P = dynamic_truncation(hexhash1)
+
+    print(f"HOTP {gen_HOTP(hashed1.digest())}")
+    # Sbits = dynamic_truncation(hexhash1)
+    # print(struct.pack('>Q', Sbits))
+    # print(Sbits)
+
 
     # print(last_4_bits)
 
