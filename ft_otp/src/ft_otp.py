@@ -20,9 +20,46 @@ def get_last_4bit(c :bytes):
     return int.from_bytes(c,byteorder='little') & 15
 
 def dynamic_truncation(HS: str):
-    last_byte = HS[19].encode()
-    OffsetBits =  get_last_4bit(last_byte)
-    print (int(HS[OffsetBits:OffsetBits + 4], 16) & 2147483647)
+    # NOTE: isoler les deux dernier character en hexa
+    #       Les convertir en int et prendre les 4 lower bits
+    last_byte_hex = HS[-2:]
+    last_byte_hex_byte = int(last_byte_hex, 16).to_bytes()
+    OffsetBits =  get_last_4bit(last_byte_hex_byte)
+    # ------------ SHOULD BE GOOD UNTIL NOW
+
+
+
+    P = HS[OffsetBits:OffsetBits + 8]
+    print(P)
+    n = int(P, 16)  & 2147483647
+    big_end = struct.pack('>i',n)
+    print(f"Big_end {int.from_bytes(big_end, 'little')}")
+    y = int.from_bytes(big_end, 'big')
+    print(f"Modulo {y % 1000000}")
+    # print(f"n is {n}")
+    # print(f"n hex is {hex(n)}")
+    # print(n.bit_length())
+    #
+    # big_end = struct.pack('>i',n)
+    # print(hex(int.from_bytes(big_end)))
+
+    # 41397eea
+    # n.to_bytes(n.bit_length() + 7) // 8, 'big')
+    # return (int(P, 16)  & 2147483647)
+
+def gen_HOTP(hash: bytes):
+    # NOTE: get the last_4_bits
+    offset =  hash[len(hash) - 1] & 0xf 
+    print(hash[offset] << 24)
+    binary =  (
+                ((hash[offset] & 0x7f) << 24) 
+              | ((hash[offset + 1] & 0xff) << 16) 
+              | ((hash[offset + 2] & 0xff) << 8) 
+              | ((hash[offset + 3]) & 0xff)
+              )
+    # NOTE: Return the 6 digits HOTP Code (10^digits) 10^6 = 1000000
+    return binary % 1000000
+ 
 
 def main():
     testSecret = b"12345678901234567890"
