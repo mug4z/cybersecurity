@@ -8,44 +8,9 @@
 # TODO: encrypt the key and decrypt it when creating the password
 
 import hmac
-# from hashlib import sha512
 from hashlib import sha1
 import struct
-# from hashlib import sha256
 
-
-# def create_htop_value(k, c):
-
-def get_last_4bit(c :bytes) -> int:
-    return int.from_bytes(c,byteorder='little') & 15
-
-def dynamic_truncation(HS: str):
-    # NOTE: isoler les deux dernier character en hexa
-    #       Les convertir en int et prendre les 4 lower bits
-    last_byte_hex = HS[-2:]
-    last_byte_hex_byte = int(last_byte_hex, 16).to_bytes()
-    OffsetBits =  get_last_4bit(last_byte_hex_byte)
-    # ------------ SHOULD BE GOOD UNTIL NOW
-
-
-
-    P = HS[OffsetBits:OffsetBits + 8]
-    print(P)
-    n = int(P, 16)  & 2147483647
-    big_end = struct.pack('>i',n)
-    print(f"Big_end {int.from_bytes(big_end, 'little')}")
-    y = int.from_bytes(big_end, 'big')
-    print(f"Modulo {y % 1000000}")
-    # print(f"n is {n}")
-    # print(f"n hex is {hex(n)}")
-    # print(n.bit_length())
-    #
-    # big_end = struct.pack('>i',n)
-    # print(hex(int.from_bytes(big_end)))
-
-    # 41397eea
-    # n.to_bytes(n.bit_length() + 7) // 8, 'big')
-    # return (int(P, 16)  & 2147483647) 
 def gen_HOTP(hash: bytes):
     # NOTE: get the last_4_bits
     offset =  hash[len(hash) - 1] & 0xf 
@@ -79,30 +44,10 @@ def main():
     hexhash1 = hashed1.hexdigest()
 
     print(f"HOTP {gen_HOTP(hashed1.digest())}")
-    # Sbits = dynamic_truncation(hexhash1)
-    # print(struct.pack('>Q', Sbits))
-    # print(Sbits)
-
-
-    # print(last_4_bits)
-
-    # print(hexhash512)
-    # print(type(0b1111))
     print(f"String = {hexhash1}")
-    # print(P)
-    # print (f"Offsetbits {OffsetBits}")
-    # print(f"String[OffsetBits] {hexhash512[OffsetBits]}\nString[OffsetBits + 3] {hexhash512[OffsetBits + 3]}")
-    
-    # print(99 & 15)
 
 
 
 if __name__ == "__main__":
     main()
 
-
-# DT(String) // String = String[0]...String[19]
-#  Let OffsetBits be the low-order 4 bits of String[19]
-#  Offset = StToNum(OffsetBits) // 0 <= OffSet <= 15
-#  Let P = String[OffSet]...String[OffSet+3]
-#  Return the Last 31 bits of P
