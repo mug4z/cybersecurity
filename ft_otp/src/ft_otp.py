@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 
-# TODO: Generate an HMAC-SHA-1 value Let HS = HMAC-SHA-1(K,C)  // HS is a 20-byte string
-#       Generate a 4-byte string (Dynamic Truncation) Let Sbits = DT(HS)   //  DT, defined below, //  returns a 31-bit string
-#       Compute an HOTP value    Let Snum  = StToNum(Sbits)   // Convert S to a number in 0...2^{31}-1
-#       Return D = Snum mod 10^Digit //  D is a number in the range
-
 # TODO: encrypt the key and decrypt it when creating the password
 
 import hmac
