@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 # TODO: encrypt the key and decrypt it when creating the password
-# TODO: Create an TOTP function
-#   TODO: Get the time correctly and pass it to the gen_HOTP function
 # TODO: Implement test with pytest
 
 import hmac
@@ -21,7 +19,6 @@ def get_time_counter(current_unix_time: float,
     
 
 
-
 # NOTE: function is ok tested with the test case of the rfc4226
 def gen_HOTP(hash: bytes):
     # NOTE: get the last_4_bits
@@ -38,24 +35,21 @@ def gen_HOTP(hash: bytes):
               | ((hash[offset + 2] & 0xff) << 8) 
               | ((hash[offset + 3]) & 0xff)
               )
-    # # NOTE: Return the 6 digits HOTP Code (10^digits) 10^6 = 1000000
-    # return binary % 1000000
-    return binary % 100000000
+    
+    #  NOTE: Return the 6 digits HOTP Code (10^digits) 10^6 = 1000000
+    return binary % 1000000
  
 
 def main():
     # NOTE: This part is OK !!!
     testSecret = b"12345678901234567890"
-    T = get_time_counter(time.time(),0,30)
+    T = get_time_counter(time.time(), 0, 30)
     testCount = struct.pack('>Q',T)
 
     #  NOTE: return the time in seconds since the epoch
     # print(f"time {time.time()}")
 
     print(f"\nTEST FOR TOTP")
-    # testSecretTOTP = "12345678901234567890"
-    # testSecret_Hex = testSecretTOTP.encode().hex()
-    # print(f"testSecret_Hex {testSecret_Hex}")
 
     hashed1 = hmac.new(testSecret, testCount, sha1)
     print(f"hashed1 hexdigest {hashed1.hexdigest()}")
