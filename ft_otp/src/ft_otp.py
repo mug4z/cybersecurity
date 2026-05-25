@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 # TODO: encrypt the key and decrypt it when creating the password
+# TODO: Create an TOTP function
+# TODO: Implement test with pytest
 
 import hmac
 from hashlib import sha1
 import struct
 
+# NOTE: function is ok tested with the test case of the rfc4226
 def gen_HOTP(hash: bytes):
     # NOTE: get the last_4_bits
     offset =  hash[len(hash) - 1] & 0xf 
@@ -31,8 +34,6 @@ def main():
     testSecret = b"12345678901234567890"
     testCount = struct.pack('>Q',9)
 
-    # NOTE: See if the 20 byte correspondance from hexadecimal what it should be represented
-    # NOTE: Tested OK with the test data of the rfc4226
     hashed1 = hmac.new(testSecret, testCount, sha1)
     print(f"hashed1 hexdigest {hashed1.hexdigest()}")
     print(len(hashed1.hexdigest()))
