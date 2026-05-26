@@ -7,6 +7,7 @@ import hmac
 from hashlib import sha1
 import struct
 import time
+import argparse
 
 from modules.ft_hotp import gen_HOTP, get_time_counter
 
@@ -14,7 +15,11 @@ from modules.ft_hotp import gen_HOTP, get_time_counter
 # def gen_TOTP(key_hex: string, time: string):
     
 def main():
-    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-g",help="The path of the key file, must be at least 64 character in hexadecimal")
+    parser.add_argument("-k","--key",action="store_true",help="generate a new temporary password")
+    args = parser.parse_args()
+
     # NOTE: This part is OK !!!
     testSecret = b"12345678901234567890"
     T = get_time_counter(time.time(), 0, 30)
