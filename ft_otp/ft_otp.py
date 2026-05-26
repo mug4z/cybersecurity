@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# TODO: encrypt the key and decrypt it when creating the password
 # TODO: Implement test with pytest
+# TODO: Check if the content of the file given in argument is a 64 character hexadecimal string
 
 import hmac
 from hashlib import sha1
