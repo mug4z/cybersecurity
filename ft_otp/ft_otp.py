@@ -63,32 +63,28 @@ def decrypt_file(file_to_decrypt: str, path_to_key: str):
 
 
 
-# def gen_TOTP(key_hex: string, time: string):
-    
 def main():
-    encrypt_file('key.txt', './.key')
-    print(decrypt_file('ft_otp.key', './.key'))
     parser = argparse.ArgumentParser()
-    parser.add_argument("-g",help="The path of the key file, must be at least 64 character in hexadecimal")
-    parser.add_argument("-k","--key",action="store_true",help="generate a new temporary password")
+    parser.add_argument("-g","--hex-key",help="The path of the key file, must be at least 64 character in hexadecimal")
+    parser.add_argument("-k","--gen-password",action="store_true",help="generate a new temporary password")
     args = parser.parse_args()
 
-    # NOTE: This part is OK !!!
-    testSecret = b"12345678901234567890"
-    T = get_time_counter(time.time(), 0, 30)
-    testCount = struct.pack('>Q',T)
-
-    #  NOTE: return the time in seconds since the epoch
-    # print(f"time {time.time()}")
-
-    print(f"\nTEST FOR TOTP")
-
-    hashed1 = hmac.new(testSecret, testCount, sha1)
-    print(f"hashed1 hexdigest {hashed1.hexdigest()}")
-    print(len(hashed1.hexdigest()))
-    hexhash1 = hashed1.hexdigest()
-    print(f"HOTP {gen_HOTP(hashed1.digest())}")
-    print(f"String = {hexhash1}")
+    if args.hex_key:
+        create_key('./.key')
+        encrypt_file(args.hex_key,'./.key')
+        exit(1)
+    
+    if args.gen_password:
+        #  NOTE: return the time in seconds since the epoch
+        T = get_time_counter(time.time(), 0, 30)
+        count = struct.pack('>Q',T)
+        secret = decrypt_file('ft_otp.key', './.key')
+        if not secret:
+            print('error')
+            exit(1)
+        hashed1 = hmac.new(secret, count, sha1)
+        print(gen_HOTP(hashed1.digest()))
+        exit(1)
 
 
 
