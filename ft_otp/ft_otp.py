@@ -36,10 +36,9 @@ def get_content_file(path_to_file: str) -> bytes:
 
 
 
-def encrypt_file(file_to_encrypt: str, path_to_key: str):
+def encrypt_file(content_to_encrypt: bytes, path_to_key: str):
         key = get_content_file(path_to_key)
         f = Fernet(key)
-        content_to_encrypt = get_content_file(file_to_encrypt)
         token = f.encrypt(content_to_encrypt)
         if os.path.isfile("ft_otp.key"):
             raise Exception("ft_otp.key already exists")
@@ -52,6 +51,7 @@ def decrypt_file(file_to_decrypt: str, path_to_key: str):
         f = Fernet(key)
         content_to_decrypt = get_content_file(file_to_decrypt)
         return f.decrypt(content_to_decrypt)
+
 def check_hex(content: str) -> bool:
     try:
         int(content, 16)
@@ -75,7 +75,7 @@ def main():
                 print("The hexadecimal is less than 64 character")
                 exit(-1)
             create_key('./.key')
-            encrypt_file(args.hex_key,'./.key')
+            encrypt_file(content,'./.key')
             exit(1)
         except Exception as e:
             print(f"Failed because of {e}")
