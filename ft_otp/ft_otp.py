@@ -9,6 +9,7 @@ import struct
 import time
 import argparse
 import os
+import math
 
 from cryptography.fernet import Fernet
 
@@ -61,7 +62,7 @@ def decrypt_file(file_to_decrypt: str, path_to_key: str):
     except Exception as e:
         print(f"Faild because of {e}")
 
-
+# def check_hex()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -83,8 +84,13 @@ def main():
             print('error')
             exit(1)
         hashed1 = hmac.new(secret, count, sha1)
-        print(gen_HOTP(hashed1.digest()))
-        exit(1)
+        
+        otp = gen_HOTP(hashed1.digest())
+        
+        if int(math.log10(otp) + 1) != 6:
+            print("0",end='')
+        print(otp)
+        
 
 
 
