@@ -5,4 +5,7 @@ up:
 down:
 	docker compose down
 
-.PHONY: up down tor-browser
+hostname:
+	docker exec ft_onion-ft_onion-1  cat /var/lib/tor/hidden_service/hostname
+
+.PHONY: up down tor-browser hostname

@@ -8,5 +8,5 @@ services:
     volumes:
     - ./html:/usr/share/nginx/html
     ports:
-      # - "8443:443"
+      - "4242:443"
       - "8080:80"
