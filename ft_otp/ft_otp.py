@@ -27,42 +27,37 @@ def create_key(path_to_key: str):
     except Exception as e:
         print(f"Faild because of {e}")
 
+def get_content_file(path_to_file: str) -> bytes:
+    content = None
+    with open(path_to_file, 'rb') as file:
+        content = file.read()
+        file.close()
+    return content
+
+
+
 def encrypt_file(file_to_encrypt: str, path_to_key: str):
-    try:
-        content_to_encrypt = None
-        f = None
-        with open(path_to_key,'rb') as file:
-            key = file.read()
-            f = Fernet(key)
-            file.close()
-        with open(file_to_encrypt,'rb') as file:
-            content_to_encrypt = file.read()
-            file.close()
+        key = get_content_file(path_to_key)
+        f = Fernet(key)
+        content_to_encrypt = get_content_file(file_to_encrypt)
         token = f.encrypt(content_to_encrypt)
         if os.path.isfile("ft_otp.key"):
             raise Exception("ft_otp.key already exists")
         with open('ft_otp.key','wb') as file:
             file.write(token)
-    except Exception as e:
-        print(f"Faild because of {e}")
 
 def decrypt_file(file_to_decrypt: str, path_to_key: str):
+        content_to_decrypt = None
+        key = get_content_file(path_to_key)
+        f = Fernet(key)
+        content_to_decrypt = get_content_file(file_to_decrypt)
+        return f.decrypt(content_to_decrypt)
+def check_hex(content: str) -> bool:
     try:
-        f = None
-        content_to_encrypt = None
-        with open(path_to_key,'rb') as file:
-            key = file.read()
-            f = Fernet(key)
-            file.close()
-        with open(file_to_decrypt,'rb') as file:
-            content_to_encrypt = file.read()
-            file.close()
-        return f.decrypt(content_to_encrypt)
-
-    except Exception as e:
-        print(f"Faild because of {e}")
-
-# def check_hex()
+        int(content, 16)
+        return True
+    except Exception:
+        return False
 
 def main():
     parser = argparse.ArgumentParser()
@@ -71,25 +66,38 @@ def main():
     args = parser.parse_args()
 
     if args.hex_key:
-        create_key('./.key')
-        encrypt_file(args.hex_key,'./.key')
-        exit(1)
+        try:
+            content = get_content_file(args.hex_key)
+            if not check_hex(content.decode()):
+                print("The file content is not valid hexadecimal")
+                exit(-1)
+            if len(content.decode()) < 64:
+                print("The hexadecimal is less than 64 character")
+                exit(-1)
+            create_key('./.key')
+            encrypt_file(args.hex_key,'./.key')
+            exit(1)
+        except Exception as e:
+            print(f"Failed because of {e}")
     
     if args.gen_password:
-        #  NOTE: return the time in seconds since the epoch
-        T = get_time_counter(time.time(), 0, 30)
-        count = struct.pack('>Q',T)
-        secret = decrypt_file('ft_otp.key', './.key')
-        if not secret:
-            print('error')
-            exit(1)
-        hashed1 = hmac.new(secret, count, sha1)
-        
-        otp = gen_HOTP(hashed1.digest())
-        
-        if int(math.log10(otp) + 1) != 6:
-            print("0",end='')
-        print(otp)
+        try:
+            #  NOTE: return the time in seconds since the epoch
+            T = get_time_counter(time.time(), 0, 30)
+            count = struct.pack('>Q',T)
+            secret = decrypt_file('ft_otp.key', './.key')
+            if not secret:
+                print('error')
+                exit(-1)
+            hashed1 = hmac.new(secret, count, sha1)
+            
+            otp = gen_HOTP(hashed1.digest())
+            
+            if int(math.log10(otp) + 1) != 6:
+                print("0",end='')
+            print(otp)
+        except Exception as e:
+            print(f"Failed because of {e}")
         
 
 
