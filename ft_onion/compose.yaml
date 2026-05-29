@@ -7,6 +7,3 @@ services:
       dockerfile: ./hidden_service/Dockerfile
     volumes:
     - ./html:/usr/share/nginx/html
-    ports:
-      - "4242:443"
-      - "8080:80"
