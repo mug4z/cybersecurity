@@ -47,6 +47,7 @@ int main()
 
   // ********
   // 42042042042042042042042
+  // 42042042042042042042042
 
   if (tmp[1] == '2') {
     if (tmp[0] == '4') {
@@ -54,8 +55,9 @@ int main()
       fflush(stdin);
       int idx = 2;
       char str[9];
-      int pos = 0;
+      int pos = 1;
       memset(str, 0, 9);
+      str[0] = '*';
 
       while(strlen(str) < 8 && idx < strlen(tmp) ){
 
@@ -63,8 +65,10 @@ int main()
         idx+=3;
       }
       printf("%s\n",strcmp(password, str) ? "Nope." : "Good job." );
+      exit(1);
 
     }
-    
   }
+  printf("Nope.\n");
+
 }
