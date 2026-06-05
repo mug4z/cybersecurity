@@ -8,7 +8,6 @@ void wt(){
 void nice(){
   printf("nice");
 }
-
 void try(){
   printf("try");
 }
@@ -37,18 +36,25 @@ void easy(){
   printf("easy");
 }
 
+void ___syscall_malloc(){
+  printf("Nope\n");
+
+}
+
+void ____syscall_malloc(){
+  printf("Good Job\n");
+}
 int main()
 {
   char *fmt = "%23s";
   char tmp[24];
   char password[24] = "********";
   printf("Please enter key: ");
-  scanf(fmt, tmp); 
-
-  // ********
-  // 42042042042042042042042
-  // 42042042042042042042042
-
+  if (scanf("%23s", tmp) != 1 || tmp[1] != '2' || tmp[0] != '4') {
+        ___syscall_malloc();
+        return (0);
+    }
+  
   if (tmp[1] == '2') {
     if (tmp[0] == '4') {
 
@@ -64,11 +70,22 @@ int main()
         str[pos++] = atoi((char[4]){tmp[idx], tmp[idx + 1],tmp[idx + 2], '\0'});
         idx+=3;
       }
-      printf("%s\n",strcmp(password, str) ? "Nope." : "Good job." );
-      exit(1);
-
+      switch (strcmp(str, password)) {
+          case (0):
+              ____syscall_malloc();
+              break;
+          case (-2):
+          case (-1):
+          case (1):
+          case (2):
+          case (3):
+          case (4):
+          case (5):
+          case (115):
+          default:
+              ___syscall_malloc();
+      }
     }
   }
-  printf("Nope.\n");
-
+  return (0);
 }
