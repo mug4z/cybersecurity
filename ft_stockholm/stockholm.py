@@ -8,8 +8,15 @@
 import argparse
 import os
 from typing import Any
+from pathlib import Path
 
 from cryptography.fernet import Fernet
+
+VERSION = 1.0
+
+def create_key() -> bytes:
+        key = Fernet.generate_key()
+        return key
 
 def get_content_file(path_to_file: str) -> bytes:
     content = None
@@ -26,33 +33,39 @@ def write_content_file(path_to_file: str, content: Any):
 def remove_file(path_to_file: str):
     os.remove(path_to_file)
 
-def encrypt_file(path_to_file: str, key: bytes):
-    try:
+def encrypt_file(path_to_file: str, key: bytes) -> bytes:
         f = Fernet(key)
-        token = f.encrypt(get_content_file(path_to_file))
-        write_content_file(path_to_file + ".ft",token)
-        remove_file(path_to_file)
-    except Exception as e:
-        print(f"Failed for {e}")
+        return (f.encrypt(get_content_file(path_to_file)))
 
 def decrypt_file(file_to_decrypt: str, key: bytes):
         f = Fernet(key)
         content_to_decrypt = get_content_file(file_to_decrypt)
         write_content_file(file_to_decrypt, f.decrypt(content_to_decrypt))
-        # return f.decrypt(content_to_decrypt)
+
+def stockholm(key: bytes):
+    home = Path.home()
+
 
 
 def main():
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("-g","--hex-key",help="The path of the key file, must be at least 64 character in hexadecimal")
-    # parser.add_argument("-k","--gen-password",action="store_true",help="generate a new temporary password")
-    # args = parser.parse_args()
-    key = Fernet.generate_key()
-    print(key)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--version", action="store_true", help="Show the version of stockholm")
+    parser.add_argument("-r", "--reverse", action="store_true", help="reverse the encryption")
+    parser.add_argument("-s", "--silent", action="store_true", help="silence the output")
+    parser.add_argument("-k", "--key", type=str, nargs="?", help="use this key for encryption")
+    args = parser.parse_args()
+
+    if args.version:
+        print(f"stockholm version {VERSION}")
+        exit(1)
+
+    if args.key:
+        key = args.key
+    else:
+        key = create_key()
+
     # encrypt_file("Makefile_to_c",key)
     decrypt_file("Makefile_to_c.ft",b'LmXY5Ljf8EFk8zFeKAr4oWlyptDgsI3M0dSACeJfK_E=')
-
-    # kdf()
 
 
 
