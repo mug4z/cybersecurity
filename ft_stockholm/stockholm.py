@@ -74,8 +74,11 @@ def remove_file(path_to_file: str):
 def encrypt_file(path_to_file: str, new_file: str, key: bytes, nonce: bytes):
         with open(path_to_file,'rb') as r_file:
             with open(new_file, 'wb') as w_file:
-                for line in r_file:
-                    w_file.write(encrypt_data(key,nonce, line))
+                while True:
+                    chunk = r_file.read(2000000)
+                    if not chunk:
+                        break
+                    w_file.write(encrypt_data(key,nonce,chunk))
                 w_file.close()
         r_file.close()
 
@@ -83,8 +86,11 @@ def encrypt_file(path_to_file: str, new_file: str, key: bytes, nonce: bytes):
 def decrypt_file(file_to_decrypt: str, new_file:str ,key: bytes, nonce:bytes):
         with open(file_to_decrypt,'rb') as r_file:
             with open(new_file, 'wb') as w_file:
-                for line in r_file:
-                    w_file.write(decrypt_data(key,nonce, line))
+                while True:
+                    chunk = r_file.read(2000000)
+                    if not chunk:
+                        break
+                    w_file.write(decrypt_data(key,nonce,chunk))
                 w_file.close()
         r_file.close()
 
@@ -142,27 +148,9 @@ def main():
                 print(f"The key {key.hex()}")
             if not args.silent:
                 print(f"Open the file")
-                with open("/home/camille/infection/LivreIT/testPDF",'ab') as f_test:
-                    with open("/home/camille/infection/LivreIT/algorithmicthinking_aproblem-basedintroduction.pdf",'rb') as f:
-                        while True:
-                            chunk = f.read(2000000)
-                            if not chunk:
-                                break
-                            f_test.write(encrypt_data(key,nonce,chunk))
-                        f.close()
-                f_test.close()
 
-                with open("/home/camille/infection/LivreIT/testPDF_recover",'ab') as f_recover:
-                    with open("/home/camille/infection/LivreIT/testPDF",'rb') as f_test:
-                        while True:
-                            chunk = f_test.read(2000000)
-                            if not chunk:
-                                break
-                            f_recover.write(decrypt_data(key,nonce,chunk))
-                        f_test.close()
-                    f_recover.close()
-                # stockholm(key,nonce, True)
-                # reverse_stockholm(key,nonce)
+                stockholm(key,nonce, True)
+                reverse_stockholm(key,nonce)
             else:
                 stockholm(key,nonce, False)
 
@@ -175,3 +163,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+                # with open("/home/camille/infection/LivreIT/testPDF",'ab') as f_test:
+                #     with open("/home/camille/infection/LivreIT/algorithmicthinking_aproblem-basedintroduction.pdf",'rb') as f:
+                #         while True:
+                #             chunk = f.read(2000000)
+                #             if not chunk:
+                #                 break
+                #             f_test.write(encrypt_data(key,nonce,chunk))
+                #         f.close()
+                # f_test.close()
+
+                # with open("/home/camille/infection/LivreIT/testPDF_recover",'ab') as f_recover:
+                #     with open("/home/camille/infection/LivreIT/testPDF",'rb') as f_test:
+                #         while True:
+                #             chunk = f_test.read(2000000)
+                #             if not chunk:
+                #                 break
+                #             f_recover.write(decrypt_data(key,nonce,chunk))
+                #         f_test.close()
+                #     f_recover.close()
