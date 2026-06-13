@@ -33,6 +33,13 @@ def create_key() -> bytes:
         key = secrets.token_bytes(32)
         return key
 
+def get_key_once(key_once: str):
+    b = bytes.fromhex(key_once)
+    nonce = b[:16]
+    key = b[16:]
+    return nonce, key
+
+
 def encrypt_data(key: bytes, nonce: bytes, plaintext: bytes) -> bytes:
     
     # Create a ChaCha20 cipher object
@@ -145,17 +152,16 @@ def main():
         if args.reverse is None:
             if key is None:
                 key = create_key()
-                print(f"The key {key.hex()}")
+                print(f"The key {(nonce + key).hex()}")
             if not args.silent:
-                print(f"Open the file")
-
                 stockholm(key,nonce, True)
-                reverse_stockholm(key,nonce)
+                # reverse_stockholm(key,nonce)
             else:
                 stockholm(key,nonce, False)
 
         if args.reverse is not None:
-            reverse_stockholm(bytes(args.reverse, 'utf-8'),nonce)
+            nonce, key = get_key_once(args.reverse)
+            reverse_stockholm(key,nonce)
         exit(1)
     except Exception as e:
         print(f"Failed for {e}")
