@@ -148,8 +148,7 @@ def main():
                 key = create_key()
                 print(f"The key {(nonce + key).hex()}")
             if not args.silent:
-                stockholm(key,nonce, True)
-                # reverse_stockholm(key,nonce)
+                stockholm(key, nonce, True)
             else:
                 stockholm(key,nonce, False)
 
