@@ -172,22 +172,3 @@ if __name__ == "__main__":
 
 
 
-                # with open("/home/camille/infection/LivreIT/testPDF",'ab') as f_test:
-                #     with open("/home/camille/infection/LivreIT/algorithmicthinking_aproblem-basedintroduction.pdf",'rb') as f:
-                #         while True:
-                #             chunk = f.read(2000000)
-                #             if not chunk:
-                #                 break
-                #             f_test.write(encrypt_data(key,nonce,chunk))
-                #         f.close()
-                # f_test.close()
-
-                # with open("/home/camille/infection/LivreIT/testPDF_recover",'ab') as f_recover:
-                #     with open("/home/camille/infection/LivreIT/testPDF",'rb') as f_test:
-                #         while True:
-                #             chunk = f_test.read(2000000)
-                #             if not chunk:
-                #                 break
-                #             f_recover.write(decrypt_data(key,nonce,chunk))
-                #         f_test.close()
-                #     f_recover.close()
