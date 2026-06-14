@@ -33,7 +33,7 @@ def create_key() -> bytes:
         key = secrets.token_bytes(32)
         return key
 
-def get_key_once(key_once: str):
+def get_nonce_key(key_once: str):
     b = bytes.fromhex(key_once)
     nonce = b[:16]
     key = b[16:]
@@ -137,23 +137,23 @@ def main():
     args = parser.parse_args()
     try:
         key = None
-        nonce = secrets.token_bytes(16)
+        nonce = None
         if args.version:
             print(f"stockholm version {VERSION}")
             exit(1)
         if args.key is not None:
-            key = args.key
+            nonce , key = get_nonce_key(args.key)
         if args.reverse is None:
-            if key is None:
-                key = create_key()
-                print(f"The key {(nonce + key).hex()}")
+            key = create_key()
+            nonce = secrets.token_bytes(16)
+            print(f"The key {(nonce + key).hex()}")
             if not args.silent:
                 stockholm(key, nonce, True)
             else:
-                stockholm(key,nonce, False)
+                stockholm(key, nonce, False)
 
         if args.reverse is not None:
-            nonce, key = get_key_once(args.reverse)
+            nonce, key = get_nonce_key(args.reverse)
             reverse_stockholm(key,nonce)
         exit(1)
     except Exception as e:
