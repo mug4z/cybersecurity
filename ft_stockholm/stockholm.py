@@ -19,8 +19,8 @@ import base64
 
 VERSION = 1.0
 # TARGET_FOLDER = "/home/tfrily/goinfre/LivreIT"
-TARGET_FOLDER = "/home/camille/infection/LivreIT"
-#Encrypt TARGET_FOLDER = Path.home().as_posix() + "/infection" 
+# TARGET_FOLDER = "/home/camille/infection"
+TARGET_FOLDER = Path.home().as_posix() + "/infection" 
 
 def get_extentions(path_to_file: str) -> dict:
     d = {}
