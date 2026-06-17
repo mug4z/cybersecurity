@@ -6,7 +6,7 @@
 int main(int argc, char* argv[])
 {
 	// open a pcap file for reading
-	pcpp::PcapFileReaderDevice reader("1_packet.pcap");
+	pcpp::PcapFileReaderDevice reader("output.pcap");
 	if (!reader.open())
 	{
 		std::cerr << "Error opening the pcap file" << std::endl;
