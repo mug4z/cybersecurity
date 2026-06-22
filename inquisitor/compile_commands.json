@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/camille/Documents/cybersecurity/inquisitor/build",
+  "command": "/usr/bin/c++  -I/home/camille/bin/vcpkg/installed/x64-linux/include/pcapplusplus -std=gnu++20 -o CMakeFiles/test.dir/writepcap.cpp.o -c /home/camille/Documents/cybersecurity/inquisitor/writepcap.cpp",
+  "file": "/home/camille/Documents/cybersecurity/inquisitor/writepcap.cpp",
+  "output": "CMakeFiles/test.dir/writepcap.cpp.o"
+}
+]

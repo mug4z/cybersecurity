@@ -1,11 +1,16 @@
 #include <iostream>
-#include "/home/tfrily/.brew/opt/pcapplusplus/include/pcapplusplus/IPv4Layer.h"
-#include "/home/tfrily/.brew/opt/pcapplusplus/include/pcapplusplus/Packet.h"
-#include "/home/tfrily/.brew/opt/pcapplusplus/include/pcapplusplus/PcapFileDevice.h"
+#include "IPv4Layer.h"
+#include "Packet.h"
+#include "PcapFileDevice.h"
+#include "PcapLiveDeviceList.h"
 
-int main (int argc, char *argv[]) {
-  
-  pcpp::PcapFileWriterDevice pcapWriter("output.pcap", pcpp::LINKTYPE_ETHERNET);
+int main () {
+  std::string interfaceIPAddr = "10.84.11.225";
+
+	// find the interface by IP address
+	pcpp::PcapLiveDevice* dev = pcpp::PcapLiveDeviceList::getInstance().getDeviceByIp(interfaceIPAddr.c_str());
+  pcpp::PcapFileWriterDevice pcapWriter("output.pcap", pcpp::LINKTYPE_FC_2);
+  std::cout << dev->getName();
 
   // try to open the file for writing
   if (!pcapWriter.open())
