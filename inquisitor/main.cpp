@@ -1,47 +1,37 @@
+#include "ArpLayer.h"
+#include "IpAddress.h"
+#include "MacAddress.h"
+#include "NetworkUtils.h"
+#include "Packet.h"
+#include "PcapFileDevice.h"
+#include "PcapLiveDevice.h"
+#include "PcapLiveDeviceList.h"
 #include <iostream>
-// #include "/home/tfrily/.brew/opt/pcapplusplus/include/pcapplusplus/IPv4Layer.h"
-// #include "/home/tfrily/.brew/opt/pcapplusplus/include/pcapplusplus/Packet.h"
-// #include "/home/tfrily/.brew/opt/pcapplusplus/include/pcapplusplus/PcapFileDevice.h"
 
-#include "/home/camille/.linuxbrew/opt/pcapplusplus/include/pcapplusplus/IPv4Layer.h"
-#include "/home/camille/.linuxbrew/opt/pcapplusplus/include/pcapplusplus/Packet.h"
-#include "/home/camille/.linuxbrew/opt/pcapplusplus/include/pcapplusplus/PcapFileDevice.h"
+void create_arp_packet() { pcpp::Packet arpRequest(500); }
 
-int main(int argc, char* argv[])
-{
-	// open a pcap file for reading
-	pcpp::PcapFileReaderDevice reader("output.pcap");
-	if (!reader.open())
-	{
-		std::cerr << "Error opening the pcap file" << std::endl;
-		return 1;
-	}
+pcpp::MacAddress getMacAddress(pcpp::IPv4Address addr,
+                               pcpp::PcapLiveDevice *device,
+                               double &timeinMili) {
+  pcpp::NetworkUtils netUtils = pcpp::NetworkUtils::getInstance();
+  return (netUtils.getMacAddress(addr, device, timeinMili));
+}
 
-	// read the first (and only) packet from the file
-	pcpp::RawPacket rawPacket;
-	if (!reader.getNextPacket(rawPacket))
-	{
-		std::cerr << "Couldn't read the first packet in the file" << std::endl;
-		return 1;
-	}
+int main() {
+  // 192.168.112.236 Maxou
+  pcpp::PcapLiveDevice *dev =
+      pcpp::PcapLiveDeviceList::getInstance().getDeviceByName("wlp0s20f3");
+  pcpp::IPv4Address target("192.168.112.236");
+  double lol = 0.0;
+  std::cout << "Max mac" << getMacAddress(target, dev, lol) << " In " << lol << " Milisecond";
 
-	// parse the raw packet into a parsed packet
-	pcpp::Packet parsedPacket(&rawPacket);
-
-	// verify the packet is IPv4
-	if (parsedPacket.isPacketOfType(pcpp::IPv4))
-	{
-		// extract source and dest IPs
-		pcpp::IPv4Address srcIP = parsedPacket.getLayerOfType<pcpp::IPv4Layer>()->getSrcIPv4Address();
-		pcpp::IPv4Address destIP = parsedPacket.getLayerOfType<pcpp::IPv4Layer>()->getDstIPv4Address();
-
-		// print source and dest IPs
-		std::cout << "Source IP is '" << srcIP << "'; "
-		          << "Dest IP is '" << destIP << "'" << std::endl;
-	}
-
-	// close the file
-	reader.close();
-
-	return 0;
+  // // pcpp::PcapLiveDevice* dev =
+  // // pcpp::PcapLiveDeviceList::getInstance().getDeviceByIp(interfaceIPAddr.c_str());
+  // pcpp::PcapFileWriterDevice pcapWriter("output.pcap", pcpp::LINKTYPE_ETHERNET);
+  // std::cout << dev->getName() << std::endl;
+  // std::cout << dev->getIPv4Address() << std::endl;
+  // std::cout << dev->getIPv6Address() << std::endl;
+  // std::cout << "Mac address " << dev->getMacAddress() << std::endl;
+  // std::cout << dev->getLinkType() << std::endl;
+  // std::cout << dev->getDeviceType() << std::endl;
 }
