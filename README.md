@@ -7,6 +7,7 @@ This repo purpose is to save the work I do during 42Lausanne cybersecurity speci
 ### Spider
 
 A small images scrapper to get them recursively like wget.
+[[Spider]]
 
 ### Scorpion
 
