@@ -2,6 +2,8 @@
 
 This repo purpose is to save the work I do during 42Lausanne cybersecurity specialization.
 
+**THIS REPOSITORY IS FOR EDUCATIONNAL PURPOSE ONLY**
+
 ## Projects
 
 ### [Spider](https://github.com/mug4z/cybersecurity/tree/main/Spider)
