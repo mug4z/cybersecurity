@@ -1,3 +1,4 @@
+
 #include "ArpLayer.h"
 #include "IpAddress.h"
 #include "MacAddress.h"
@@ -6,6 +7,9 @@
 #include "PcapFileDevice.h"
 #include "PcapLiveDevice.h"
 #include "PcapLiveDeviceList.h"
+#include "SystemUtils.h"
+#include <cstdlib>
+#include <getopt.h>
 #include <iostream>
 
 void create_arp_packet() { pcpp::Packet arpRequest(500); }
@@ -17,21 +21,46 @@ pcpp::MacAddress getMacAddress(pcpp::IPv4Address addr,
   return (netUtils.getMacAddress(addr, device, timeinMili));
 }
 
-int main() {
-  // 192.168.112.236 Maxou
-  pcpp::PcapLiveDevice *dev =
-      pcpp::PcapLiveDeviceList::getInstance().getDeviceByName("wlp0s20f3");
-  pcpp::IPv4Address target("192.168.112.236");
-  double lol = 0.0;
-  std::cout << "Max mac" << getMacAddress(target, dev, lol) << " In " << lol << " Milisecond";
+int main(int argc, char **argv) {
 
-  // // pcpp::PcapLiveDevice* dev =
-  // // pcpp::PcapLiveDeviceList::getInstance().getDeviceByIp(interfaceIPAddr.c_str());
-  // pcpp::PcapFileWriterDevice pcapWriter("output.pcap", pcpp::LINKTYPE_ETHERNET);
-  // std::cout << dev->getName() << std::endl;
-  // std::cout << dev->getIPv4Address() << std::endl;
-  // std::cout << dev->getIPv6Address() << std::endl;
-  // std::cout << "Mac address " << dev->getMacAddress() << std::endl;
-  // std::cout << dev->getLinkType() << std::endl;
-  // std::cout << dev->getDeviceType() << std::endl;
+  pcpp::AppName::init(argc, argv);
+
+  if (argc < 5) {
+    std::cout << "Not enough arguments" << std::endl;
+    exit(1);
+  }
+
+  std::string ip_src = argv[1], mac_src = argv[2], ip_target = argv[3],
+              mac_target = argv[4];
+
+  if (ip_src == "" || mac_src == "" || ip_target == "" || mac_target == "") {
+
+    std::cout << "Please give source ip/mac and target ip/mac" << std::endl;
+    exit(1);
+  }
+
+  pcpp::IPv4Address IPv4_source;
+  // pcpp::MacAddress MAC_source;
+  // pcpp::IPv4Address IPv4_target;
+  // pcpp::MacAddress MAC_target;
+
+  try {
+
+    IPv4_source = pcpp::IPv4Address(ip_src);
+
+  } catch (const std::exception &) {
+    std::cout << "Ip source not valid" << std::endl;
+    exit(1);
+  }
+  pcpp::PcapLiveDevice *pIfaceDevice =
+      pcpp::PcapLiveDeviceList::getInstance().getDeviceByIp(IPv4_source);
+  std::cout << pIfaceDevice->getName() << std::endl;
+
+  if (pIfaceDevice == nullptr) {
+    std::cout << "Cannot find interface " << std::endl;
+    exit(1);
+  }
 }
+
+// TODO: Create an eth and arplayer
+// TODO: Create
