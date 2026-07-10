@@ -53,9 +53,6 @@ void restoreARP(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
   pDevice->sendPacket(&sourceARPReply);
 }
 
-// TODO: arpspoofing
-//          IN -> device ,ip_src mac_src ip_target mac_target
-//          OUT -> void
 void arpspoofing(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
                  pcpp::MacAddress &mac_src, pcpp::IPv4Address &ipv4_target,
                  pcpp::MacAddress &mac_target) {
