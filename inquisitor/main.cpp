@@ -176,5 +176,3 @@ int main(int argc, char **argv) {
   arpspoofing(pIfaceDevice, IPv4_source, MAC_source, IPv4_target, MAC_target);
 }
 
-// TODO: Create an eth and arplayer
-// TODO: Create
