@@ -16,12 +16,7 @@
 
 void create_arp_packet() { pcpp::Packet arpRequest(500); }
 
-pcpp::MacAddress getMacAddress(pcpp::IPv4Address addr,
-                               pcpp::PcapLiveDevice *device,
-                               double &timeinMili) {
-  pcpp::NetworkUtils netUtils = pcpp::NetworkUtils::getInstance();
-  return (netUtils.getMacAddress(addr, device, timeinMili));
-}
+
 
 void restoreARP(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
                 pcpp::MacAddress &mac_src, pcpp::IPv4Address &ipv4_target,
@@ -175,4 +170,3 @@ int main(int argc, char **argv) {
   }
   arpspoofing(pIfaceDevice, IPv4_source, MAC_source, IPv4_target, MAC_target);
 }
-
